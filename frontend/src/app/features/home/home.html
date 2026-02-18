@@ -1,0 +1,53 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+  <div class="w-full max-w-4xl">
+    <!-- Title -->
+    <div class="text-center mb-12">
+      <h1 class="text-6xl font-bold text-gray-800 mb-4">
+        <span class="text-blue-600">P</span>ersonal W<span class="text-blue-600">iki</span>
+      </h1>
+      <p class="text-xl text-gray-600">
+        Search your knowledge base
+      </p>
+    </div>
+
+    <!-- Big Search Bar -->
+    <app-search-bar (search)="onSearch($event)"></app-search-bar>
+
+    <!-- Quick Stats -->
+    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Total Pages -->
+      <div class="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition">
+        <div *ngIf="isLoading" class="text-3xl font-bold text-gray-400 mb-2">
+          <div class="inline-block animate-pulse">--</div>
+        </div>
+        <div *ngIf="!isLoading" class="text-3xl font-bold text-blue-600 mb-2">
+          {{ totalPages }}
+        </div>
+        <div class="text-gray-600">Total Pages</div>
+      </div>
+
+      <!-- Total Tags -->
+      <div class="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition">
+        <div *ngIf="isLoading" class="text-3xl font-bold text-gray-400 mb-2">
+          <div class="inline-block animate-pulse">--</div>
+        </div>
+        <div *ngIf="!isLoading" class="text-3xl font-bold text-green-600 mb-2">
+          {{ totalTags }}
+        </div>
+        <div class="text-gray-600">Tags</div>
+      </div>
+
+      <!-- Recent Updates -->
+      <div class="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition">
+        <div *ngIf="isLoading" class="text-3xl font-bold text-gray-400 mb-2">
+          <div class="inline-block animate-pulse">--</div>
+        </div>
+        <div *ngIf="!isLoading" class="text-3xl font-bold text-purple-600 mb-2">
+          {{ recentUpdates }}
+        </div>
+        <div class="text-gray-600">Recent Updates</div>
+        <div class="text-xs text-gray-500 mt-1">(Last 7 days)</div>
+      </div>
+    </div>
+  </div>
+</div>

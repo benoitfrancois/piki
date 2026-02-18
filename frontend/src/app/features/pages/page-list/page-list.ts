@@ -1,0 +1,164 @@
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink, ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { MarkdownModule } from 'ngx-markdown';
+import { PageService } from '../../../services/page.service';
+import { Page, TypePage, Tag } from '../../../models/page.model';
+
+@Component({
+  selector: 'app-page-list',
+  standalone: true,
+  imports: [CommonModule, RouterLink, FormsModule, MarkdownModule],
+  templateUrl: './page-list.html',
+  styleUrls: ['./page-list.scss']
+})
+export class PageListComponent implements OnInit {
+  allPages: Page[] = [];
+  filteredPages: Page[] = [];
+  allTags: Tag[] = [];
+
+  searchQuery: string = '';
+  selectedType: string = 'ALL';
+  selectedTags: string[] = [];
+
+  isLoading = true;
+
+  // Page types for filter
+  pageTypes = [
+    { value: 'ALL', label: 'All Types' },
+    { value: 'DEFINITION', label: 'Definition' },
+    { value: 'SCHEMA', label: 'Schema' },
+    { value: 'WORKFLOW', label: 'Workflow' },
+    { value: 'MAINTENANCE', label: 'Maintenance' },
+    { value: 'AUTRE', label: 'Other' }
+  ];
+
+  constructor(
+    private pageService: PageService,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    // Check if there's a search query from URL
+    this.route.queryParams.subscribe(params => {
+      if (params['search']) {
+        this.searchQuery = params['search'];
+      }
+    });
+
+    this.loadPages();
+    this.loadTags();
+  }
+
+  loadPages(): void {
+    this.isLoading = true;
+    this.pageService.getAllPages().subscribe({
+      next: (pages) => {
+        this.allPages = pages;
+        this.applyFilters();
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading pages:', error);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadTags(): void {
+    this.pageService.getAllTags().subscribe({
+      next: (tags) => {
+        this.allTags = tags;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading tags:', error);
+      }
+    });
+  }
+
+  applyFilters(): void {
+    let filtered = [...this.allPages];
+
+    // Filter by search query
+    if (this.searchQuery.trim()) {
+      const query = this.searchQuery.toLowerCase();
+      filtered = filtered.filter(page =>
+        page.title.toLowerCase().includes(query) ||
+        page.content?.toLowerCase().includes(query) ||
+        page.tags.some(tag => tag.name.toLowerCase().includes(query))
+      );
+    }
+
+    // Filter by type
+    if (this.selectedType !== 'ALL') {
+      filtered = filtered.filter(page => page.type === this.selectedType);
+    }
+
+    // Filter by tags
+    if (this.selectedTags.length > 0) {
+      filtered = filtered.filter(page =>
+        this.selectedTags.some(selectedTag =>
+          page.tags.some(tag => tag.name === selectedTag)
+        )
+      );
+    }
+
+    this.filteredPages = filtered;
+  }
+
+  onSearchChange(): void {
+    this.applyFilters();
+  }
+
+  onTypeChange(): void {
+    this.applyFilters();
+  }
+
+  toggleTag(tagName: string): void {
+    const index = this.selectedTags.indexOf(tagName);
+    if (index > -1) {
+      this.selectedTags.splice(index, 1);
+    } else {
+      this.selectedTags.push(tagName);
+    }
+    this.applyFilters();
+  }
+
+  isTagSelected(tagName: string): boolean {
+    return this.selectedTags.includes(tagName);
+  }
+
+  clearFilters(): void {
+    this.searchQuery = '';
+    this.selectedType = 'ALL';
+    this.selectedTags = [];
+    this.applyFilters();
+  }
+
+  getTypeColor(type: string): string {
+    const colors: { [key: string]: string } = {
+      'DEFINITION': 'bg-blue-100 text-blue-800',
+      'SCHEMA': 'bg-green-100 text-green-800',
+      'WORKFLOW': 'bg-purple-100 text-purple-800',
+      'MAINTENANCE': 'bg-red-100 text-red-800',
+      'AUTRE': 'bg-gray-100 text-gray-800'
+    };
+    return colors[type] || 'bg-gray-100 text-gray-800';
+  }
+
+  getTypeLabel(type: string): string {
+    const labels: { [key: string]: string } = {
+      'DEFINITION': 'Definition',
+      'SCHEMA': 'Schema',
+      'WORKFLOW': 'Workflow',
+      'MAINTENANCE': 'Maintenance',
+      'AUTRE': 'Other'
+    };
+    return labels[type] || type;
+  }
+}

@@ -1,0 +1,27 @@
+# Maven
+target/
+*.jar
+*.jar.original
+*.war
+*.class
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Runtime data
+data/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Build output - Angular files copied by Maven
+src/main/resources/static/
+
+# OS
+.DS_Store
+Thumbs.db

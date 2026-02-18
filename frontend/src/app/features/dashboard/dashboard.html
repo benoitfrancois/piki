@@ -1,0 +1,156 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+  <div class="container mx-auto px-4">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
+      <p class="text-gray-600">Overview of your personal wiki</p>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <p class="mt-4 text-gray-600">Loading statistics...</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div *ngIf="!isLoading">
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Total Pages -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-500 text-sm font-medium">Total Pages</p>
+              <p class="text-3xl font-bold text-gray-800 mt-2">{{ stats.total }}</p>
+            </div>
+            <div class="bg-blue-100 rounded-full p-3">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Tags -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-500 text-sm font-medium">Unique Tags</p>
+              <p class="text-3xl font-bold text-gray-800 mt-2">{{ stats.totalTags }}</p>
+            </div>
+            <div class="bg-green-100 rounded-full p-3">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Page Types -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-500 text-sm font-medium">Page Types</p>
+              <p class="text-3xl font-bold text-gray-800 mt-2">{{ Object.keys(stats.byType).length }}</p>
+            </div>
+            <div class="bg-purple-100 rounded-full p-3">
+              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two Columns Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Pages by Type -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Pages by Type</h2>
+
+          <div *ngIf="stats.total === 0" class="text-center py-8 text-gray-500">
+            No pages yet
+          </div>
+
+          <div *ngIf="stats.total > 0" class="space-y-3">
+            <div *ngFor="let item of stats.byType | keyvalue"
+                 class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div class="flex items-center space-x-3">
+                <span [class]="getTypeColor(item.key) + ' px-3 py-1 rounded-full text-sm font-medium'">
+                  {{ getTypeLabel(item.key) }}
+                </span>
+              </div>
+              <span class="text-2xl font-bold text-gray-700">{{ item.value }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Tags -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Most Used Tags</h2>
+
+          <div *ngIf="stats.topTags.length === 0" class="text-center py-8 text-gray-500">
+            No tags yet
+          </div>
+
+          <div *ngIf="stats.topTags.length > 0" class="space-y-2">
+            <div *ngFor="let tagStat of stats.topTags"
+                 class="flex items-center justify-between p-2">
+              <div class="flex items-center space-x-2">
+                <span class="text-blue-600">#{{ tagStat.tag }}</span>
+              </div>
+              <div class="flex items-center space-x-3">
+                <div class="w-32 bg-gray-200 rounded-full h-2">
+                  <div class="bg-blue-600 h-2 rounded-full"
+                       [style.width.%]="(tagStat.count / stats.total) * 100">
+                  </div>
+                </div>
+                <span class="text-sm font-medium text-gray-600 w-8 text-right">{{ tagStat.count }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Pages -->
+      <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold text-gray-800">Recent Updates</h2>
+          <a routerLink="/pages" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            View All →
+          </a>
+        </div>
+
+        <div *ngIf="stats.recentPages.length === 0" class="text-center py-8 text-gray-500">
+          No pages yet. <a routerLink="/pages/new" class="text-blue-600 hover:underline">Create your first page!</a>
+        </div>
+
+        <div *ngIf="stats.recentPages.length > 0" class="space-y-3">
+          <a *ngFor="let page of stats.recentPages"
+             [routerLink]="['/pages', page.id]"
+             class="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <h3 class="font-semibold text-gray-800 mb-1">{{ page.title }}</h3>
+                <div class="flex items-center space-x-2">
+                  <span [class]="getTypeColor(page.type) + ' px-2 py-1 rounded text-xs font-medium'">
+                    {{ getTypeLabel(page.type) }}
+                  </span>
+                  <span class="text-xs text-gray-500">
+                    Updated {{ page.updatedAt | date:'short' }}
+                  </span>
+                </div>
+                <div *ngIf="page.tags.length > 0" class="mt-2 flex flex-wrap gap-2">
+                  <span *ngFor="let tag of page.tags"
+                        class="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                    #{{ tag.name }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
