@@ -2,7 +2,6 @@ package com.personalwiki.controller;
 
 import com.personalwiki.dto.PageRequestDTO;
 import com.personalwiki.model.Page;
-import com.personalwiki.model.Type;
 import com.personalwiki.model.Tag;
 import com.personalwiki.service.PageService;
 import lombok.RequiredArgsConstructor;

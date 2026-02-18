@@ -19,7 +19,7 @@ public class Type {
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 
-    // Colour Tailwind ex: "blue", "green", "purple", "red", "orange", "gray"
+    // Tailwind Colour ex: "blue", "green", "purple", "red", "orange", "yellow", "pink", "gray"
     @Column(nullable = false, length = 30)
     private String color = "gray";
 

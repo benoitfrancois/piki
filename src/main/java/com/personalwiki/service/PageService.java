@@ -3,6 +3,7 @@ package com.personalwiki.service;
 import com.personalwiki.dto.PageRequestDTO;
 import com.personalwiki.model.Page;
 import com.personalwiki.model.Tag;
+import com.personalwiki.model.Type;
 import com.personalwiki.repository.PageRepository;
 import com.personalwiki.repository.TagRepository;
 import com.personalwiki.repository.TypeRepository;
@@ -10,10 +11,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class PageService {
@@ -46,47 +44,36 @@ public class PageService {
     }
 
     @Transactional
-    public Page createPage(PageRequestDTO pageRequest) {
+    public Page createPage(PageRequestDTO dto) {
         Page page = new Page();
-        page.setTitle(pageRequest.getTitle());
-        page.setContent(pageRequest.getContent());
+        page.setTitle(dto.getTitle());
+        page.setContent(dto.getContent());
 
-        if (pageRequest.getType() != null) {
-            typeRepository.findById(pageRequest.getTypeId())
-                    .ifPresent(page::setType);
-        }
+        // Resolve the type from its ID (the object received may be partial)
+        resolveType(dto.getType()).ifPresent(page::setType);
 
-        if (pageRequest.getTags() != null && !pageRequest.getTags().isEmpty()) {
-            Set<Tag> tags = findOrCreateTags(pageRequest.getTags());
-            for (Tag tag : tags) {
-                page.addTag(tag);
-            }
+        if (dto.getTags() != null && !dto.getTags().isEmpty()) {
+            findOrCreateTags(dto.getTags()).forEach(page::addTag);
         }
 
         return pageRepository.save(page);
     }
 
     @Transactional
-    public Page updatePage(Long id, PageRequestDTO pageRequest) {
+    public Page updatePage(Long id, PageRequestDTO dto) {
         Page page = pageRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Page non trouvée : " + id));
+                .orElseThrow(() -> new RuntimeException("Page not found : " + id));
 
-        page.setTitle(pageRequest.getTitle());
-        page.setContent(pageRequest.getContent());
+        page.setTitle(dto.getTitle());
+        page.setContent(dto.getContent());
 
-        if (pageRequest.getTypeId() != null) {
-            typeRepository.findById(pageRequest.getTypeId())
-                    .ifPresent(page::setType);
-        } else {
-            page.setType(null);
-        }
+        // Update the Type
+        Optional<Type> resolved = resolveType(dto.getType());
+        page.setType(resolved.orElse(null));
 
         page.getTags().clear();
-        if (pageRequest.getTags() != null && !pageRequest.getTags().isEmpty()) {
-            Set<Tag> newTags = findOrCreateTags(pageRequest.getTags());
-            for (Tag tag : newTags) {
-                page.addTag(tag);
-            }
+        if (dto.getTags() != null && !dto.getTags().isEmpty()) {
+            findOrCreateTags(dto.getTags()).forEach(page::addTag);
         }
 
         return pageRepository.save(page);
@@ -95,6 +82,16 @@ public class PageService {
     @Transactional
     public void deletePage(Long id) {
         pageRepository.deleteById(id);
+    }
+
+    /**
+     * Retrieves the managed type from the database based on the partial object received from the DTO.
+     * Angular sends { id: X, name: ‘...’, colour: ‘...’, icon: ‘...’ }
+     * Only the ID is used to find the entity managed by Hibernate.
+     */
+    private Optional<Type> resolveType(Type dtoType) {
+        if (dtoType == null || dtoType.getId() == null) return Optional.empty();
+        return typeRepository.findById(dtoType.getId());
     }
 
     private Set<Tag> findOrCreateTags(Set<String> tagNames) {
@@ -106,6 +103,10 @@ public class PageService {
             tags.add(tag);
         }
         return tags;
+    }
+
+    public List<Page> searchByTitle(String title) {
+        return pageRepository.findByTitleContainingIgnoreCase(title);
     }
 
 }

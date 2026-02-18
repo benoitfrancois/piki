@@ -36,7 +36,7 @@ public class TypeController {
         String icon  = body.getOrDefault("icon", "📄");
 
         if (name.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Le nom est requis"));
+            return ResponseEntity.badRequest().body(Map.of("error", "The name is mandatory"));
         }
         try {
             return ResponseEntity.ok(typeService.createType(name, color, icon));
@@ -52,7 +52,7 @@ public class TypeController {
         String icon  = body.getOrDefault("icon", "📄");
 
         if (name.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Le nom est requis"));
+            return ResponseEntity.badRequest().body(Map.of("error", "The name is mandatory"));
         }
         try {
             return ResponseEntity.ok(typeService.updateType(id, name, color, icon));

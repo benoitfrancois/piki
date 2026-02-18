@@ -14,18 +14,15 @@ import java.util.Optional;
 public interface PageRepository extends JpaRepository<Page, Long> {
 
     // Force fetch tags with JOIN FETCH
-    @Query("SELECT DISTINCT p FROM Page p LEFT JOIN FETCH p.tags")
+    @Query("SELECT DISTINCT p FROM Page p LEFT JOIN FETCH p.tags LEFT JOIN FETCH p.type")
     List<Page> findAllWithTags();
 
-    @Query("SELECT p FROM Page p LEFT JOIN FETCH p.tags WHERE p.id = :id")
+    @Query("SELECT p FROM Page p LEFT JOIN FETCH p.tags LEFT JOIN FETCH p.type WHERE p.id = :id")
     Optional<Page> findByIdWithTags(@Param("id") Long id);
 
     // Find by type with tags
-    @Query("SELECT DISTINCT p FROM Page p LEFT JOIN FETCH p.tags WHERE p.type = :type")
+    @Query("SELECT DISTINCT p FROM Page p LEFT JOIN FETCH p.tags LEFT JOIN FETCH p.type WHERE p.type = :type")
     List<Page> findByTypeWithTags(@Param("type") Type type);
-
-    // Search by type
-    List<Page> findByType(Type type);
 
     // Search by title (content)
     List<Page> findByTitleContainingIgnoreCase(String title);
