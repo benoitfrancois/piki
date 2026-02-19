@@ -153,6 +153,20 @@ export class PageListComponent implements OnInit {
     return map[color] || map['gray'];
   }
 
+  getHeaderColor(color: string | undefined): string {
+    const map: Record<string, string> = {
+      blue:   'bg-blue-500',
+      green:  'bg-green-500',
+      purple: 'bg-purple-500',
+      red:    'bg-red-500',
+      orange: 'bg-orange-500',
+      yellow: 'bg-yellow-500',
+      pink:   'bg-pink-500',
+      gray:   'bg-gray-500',
+    };
+    return map[color ?? ''] || 'bg-blue-600'; // ← blue Piki par défaut
+  }
+
   compareTypes(a: Type | null, b: Type | null): boolean {
     return a?.id === b?.id;
   }

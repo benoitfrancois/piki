@@ -105,47 +105,51 @@
     </div>
 
     <!-- Pages Grid -->
-    <div *ngIf="!isLoading && filteredPages.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngIf="!isLoading && filteredPages.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
       <a
         *ngFor="let page of filteredPages"
         [routerLink]="['/pages', page.id]"
-        class="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer"
+        class="block bg-white rounded-lg shadow-md hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer"
+        style="overflow: visible;"
       >
-        <!-- Type Badge -->
-        <div class="flex items-center justify-between mb-3">
-          <span *ngIf="page.type" [ngClass]="getTypeBadgeClass(page.type.color)" class="px-3 py-1 rounded-full text-xs font-semibold">
-            {{ page.type.icon }} {{ page.type.name }}
-          </span>
-          <span *ngIf="!page.type" class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-xs font-semibold">
-            No type
-          </span>
-          <span class="text-xs text-gray-500">
-            {{ page.updatedAt | date:'short' }}
-          </span>
-        </div>
-
-        <!-- Title -->
-        <h3 class="text-xl font-bold text-gray-800 mb-3 line-clamp-2">
-          {{ page.title }}
-        </h3>
-
-        <!-- Content Preview -->
+        <!-- Colored header -->
         <div
-          *ngIf="page.content"
-          class="text-gray-600 text-sm mb-4 line-clamp-3 markdown-preview"
-          markdown
-          [data]="page.content"
-        >
+          class="relative rounded-t-lg px-3 pb-2 pt-8 overflow-hidden"
+          [ngClass]="getHeaderColor(page.type?.color)">
+
+          <!-- Type label : top-0 + -translate-y-3/4 → 1/4 dans le header, 3/4 au-dessus -->
+          <span class="absolute top-0 left-3 translate-y-1/4
+
+                     text-white font-bold text-4xl leading-none
+                     drop-shadow-sm whitespace-nowrap">
+            {{ page.type?.name || 'No type' }}
+          </span>
+
+          <!-- Date top right -->
+          <span class="absolute top-2 right-4 text-white text-xs opacity-75">
+            {{ page.updatedAt | date:'dd/MM/yyyy' }}
+          </span>
         </div>
 
-        <!-- Tags -->
-        <div *ngIf="page.tags.length > 0" class="flex flex-wrap gap-2">
-          <span
-            *ngFor="let tag of page.tags"
-            class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded"
-          >
-            #{{ tag.name }}
-          </span>
+        <!-- Card body -->
+        <div class="px-4 pb-4 pt-3 rounded-b-lg">
+          <!-- Title -->
+          <h3 class="text-lg font-bold text-gray-800 mb-2 line-clamp-2">
+            {{ page.title }}
+          </h3>
+          <!-- Content preview -->
+          <div
+            *ngIf="page.content"
+            class="text-gray-500 text-sm mb-3 line-clamp-2 markdown-preview"
+            markdown [data]="page.content">
+          </div>
+          <!-- Tags -->
+          <div *ngIf="page.tags.length > 0" class="flex flex-wrap gap-1 mt-2">
+            <span *ngFor="let tag of page.tags"
+                  class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">
+              #{{ tag.name }}
+            </span>
+          </div>
         </div>
       </a>
     </div>
