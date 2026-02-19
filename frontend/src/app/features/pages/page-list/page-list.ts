@@ -25,16 +25,6 @@ export class PageListComponent implements OnInit {
 
   isLoading = true;
 
-  // Page types for filter
-  pageTypes = [
-    { value: 'ALL', label: 'All Types' },
-    { value: 'DEFINITION', label: 'Definition' },
-    { value: 'SCHEMA', label: 'Schema' },
-    { value: 'WORKFLOW', label: 'Workflow' },
-    { value: 'MAINTENANCE', label: 'Maintenance' },
-    { value: 'AUTRE', label: 'Other' }
-  ];
-
   constructor(
     private pageService: PageService,
     private route: ActivatedRoute,

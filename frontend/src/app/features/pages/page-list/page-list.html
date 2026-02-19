@@ -34,10 +34,12 @@
           <select
             [(ngModel)]="selectedType"
             (ngModelChange)="onTypeChange()"
+            [compareWith]="compareTypes"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           >
-            <option *ngFor="let type of pageTypes" [value]="type.value">
-              {{ type.label }}
+            <option [ngValue]="null">All Types</option>
+            <option *ngFor="let type of availableTypes" [ngValue]="type">
+              {{ type.icon }} {{ type.name }}
             </option>
           </select>
         </div>

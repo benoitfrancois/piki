@@ -52,6 +52,7 @@ export class TypeManagerComponent implements OnInit {
     this.pageService.getAllTypes().subscribe({
       next: types => {
         this.types = types;
+        this.applyFilter();
         this.isLoading = false;
         this.cdr.detectChanges();
       },
