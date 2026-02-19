@@ -16,7 +16,7 @@
     <artifactId>PersonalWiki</artifactId>
     <version>2.0-SNAPSHOT</version>
     <name>PersonalWiki</name>
-    <description>Wiki personnel avec recherche puissante</description>
+    <description>Personal Wiki with powerful search</description>
 
     <properties>
         <java.version>17</java.version>
@@ -45,14 +45,14 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Lombok (optionnel mais très pratique) -->
+        <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- Spring Boot DevTools (rechargement auto en dev) -->
+        <!-- Spring Boot DevTools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
