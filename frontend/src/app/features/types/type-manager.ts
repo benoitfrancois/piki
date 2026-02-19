@@ -13,11 +13,19 @@ import { Type } from '../../models/page.model';
 })
 export class TypeManagerComponent implements OnInit {
   types: Type[] = [];
+  filteredTypes: Type[] = [];
+  filterQuery = '';
   isLoading = true;
   createError = '';
-  newName = ''; newColor = 'gray'; newIcon = '📄';
+
+  newName = '';
+  newColor = 'gray';
+  newIcon = '📄';
+
   editingId: number | null = null;
-  editName = ''; editColor = 'gray'; editIcon = '📄';
+  editName = '';
+  editColor = 'gray';
+  editIcon = '📄';
 
   colorOptions = [
     { value: 'blue',   label: '🔵 Bleu'   },
@@ -30,29 +38,72 @@ export class TypeManagerComponent implements OnInit {
     { value: 'gray',   label: '⚫ Gris'   },
   ];
 
-  constructor(private pageService: PageService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private pageService: PageService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+  }
 
   load(): void {
     this.isLoading = true;
     this.pageService.getAllTypes().subscribe({
-      next: types => { this.types = types; this.isLoading = false; this.cdr.detectChanges(); },
-      error: () => { this.isLoading = false; this.cdr.detectChanges(); }
+      next: types => {
+        this.types = types;
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
     });
+  }
+
+  applyFilter(): void {
+    const q = this.filterQuery.toLowerCase().trim();
+    this.filteredTypes = q
+      ? this.types.filter(t => t.name.toLowerCase().includes(q))
+      : [...this.types];
+  }
+
+  onFilterChange(): void {
+    this.applyFilter();
+  }
+
+  clearFilter(): void {
+    this.filterQuery = ''; this.applyFilter();
   }
 
   create(): void {
-    if (!this.newName.trim()) { this.createError = 'Le nom est requis'; return; }
+    if (!this.newName.trim()) { this.createError = 'Name is required'; return; }
     this.createError = '';
     this.pageService.createType(this.newName.trim(), this.newColor, this.newIcon || '📄').subscribe({
-      next: t => { this.types = [...this.types, t]; this.newName = ''; this.newColor = 'gray'; this.newIcon = '📄'; this.cdr.detectChanges(); },
-      error: err => { this.createError = err.error?.error || 'Erreur création'; this.cdr.detectChanges(); }
+      next: t => {
+        this.types = [...this.types, t];
+        this.newName = '';
+        this.newColor = 'gray';
+        this.newIcon = '📄';
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        this.createError = err.error?.error || 'Creation error';
+        this.cdr.detectChanges();
+      }
     });
   }
 
-  startEdit(t: Type): void { this.editingId = t.id; this.editName = t.name; this.editColor = t.color; this.editIcon = t.icon; }
-  cancelEdit(): void { this.editingId = null; }
+  startEdit(t: Type): void {
+    this.editingId = t.id;
+    this.editName = t.name;
+    this.editColor = t.color;
+    this.editIcon = t.icon;
+  }
+  cancelEdit(): void {
+    this.editingId = null;
+  }
 
   saveEdit(t: Type): void {
     if (!this.editName.trim()) return;
@@ -64,15 +115,20 @@ export class TypeManagerComponent implements OnInit {
         this.cancelEdit();
         this.cdr.detectChanges();
       },
-      error: err => { alert(err.error?.error || 'Erreur mise à jour'); }
+      error: err => { alert(err.error?.error || 'Update error'); }
     });
   }
 
   delete(t: Type): void {
-    if (!confirm(`Supprimer "${t.name}" ? Les pages associées n'auront plus de type.`)) return;
+    if (!confirm(`Delete type "${t.name}" ? Associated pages will have no type.`)) return;
     this.pageService.deleteType(t.id).subscribe({
-      next: () => { this.types = this.types.filter(x => x.id !== t.id); this.cdr.detectChanges(); },
-      error: err => { alert(err.error?.error || 'Erreur suppression'); }
+      next: () => {
+        this.types = this.types.filter(x => x.id !== t.id);
+        this.cdr.detectChanges();
+        },
+      error: err => {
+        alert(err.error?.error || 'Delete error');
+      }
     });
   }
 
