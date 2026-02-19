@@ -1,0 +1,70 @@
+<div>
+  <h2 class="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
+    🏷️ Tags
+    <span class="bg-indigo-100 text-indigo-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+      {{ filteredTags.length }} / {{ tags.length }}
+    </span>
+  </h2>
+
+  <!-- Create -->
+  <div class="flex gap-2 mb-4">
+    <input type="text" [(ngModel)]="newName"
+           (keyup.enter)="create()"
+           placeholder="Nouveau tag..."
+           class="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+    <button (click)="create()"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+      Add
+    </button>
+  </div>
+  <p *ngIf="errorMsg" class="text-red-500 text-xs mb-3">{{ errorMsg }}</p>
+
+  <!-- Filter -->
+  <div class="relative mb-4">
+    <input
+      type="text"
+      [(ngModel)]="filterQuery"
+      (ngModelChange)="onFilterChange()"
+      placeholder="Filter tags..."
+      class="w-full px-3 py-2 pl-8 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50"
+    />
+    <span class="absolute left-2.5 top-2.5 text-gray-400 text-xs">🔍</span>
+    <button
+      *ngIf="filterQuery"
+      (click)="clearFilter()"
+      class="absolute right-2.5 top-2 text-gray-400 hover:text-gray-600 text-lg leading-none">
+      ×
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="text-slate-400 text-sm text-center py-8">Loading...</div>
+
+  <p *ngIf="!isLoading && tags.length === 0" class="text-slate-400 text-sm text-center py-8">No tag.</p>
+
+  <p *ngIf="!isLoading && tags.length > 0 && filteredTags.length === 0"
+     class="text-gray-400 text-sm text-center py-8">No results for "{{ filterQuery }}".</p>
+
+  <ul class="grid grid-cols-2 gap-2">
+    <li *ngFor="let tag of filteredTags" class="group flex items-center gap-2">
+      <!-- Display -->
+      <div *ngIf="editingId !== tag.id"
+           class="flex-1 flex items-center justify-between bg-slate-50 hover:bg-slate-100 rounded-xl px-4 py-2.5 transition-colors">
+        <span class="text-sm font-medium text-slate-700"># {{ tag.name }}</span>
+        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button (click)="startEdit(tag)" class="text-slate-400 hover:text-indigo-600 p-1 rounded text-xs">✏️</button>
+          <button (click)="delete(tag)"    class="text-slate-400 hover:text-red-500 p-1 rounded text-xs">🗑️</button>
+        </div>
+      </div>
+      <!-- Edition -->
+      <div *ngIf="editingId === tag.id" class="flex-1 flex gap-2">
+        <input type="text" [(ngModel)]="editingName"
+               (keyup.enter)="saveEdit(tag)" (keyup.escape)="cancelEdit()"
+               class="flex-1 px-3 py-2 border-2 border-indigo-400 rounded-xl text-sm focus:outline-none" />
+        <button (click)="saveEdit(tag)"
+                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold">✓</button>
+        <button (click)="cancelEdit()"
+                class="bg-slate-200 hover:bg-slate-300 text-slate-600 px-3 py-1 rounded-lg text-xs">✕</button>
+      </div>
+    </li>
+  </ul>
+</div>
