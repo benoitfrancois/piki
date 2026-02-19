@@ -71,25 +71,17 @@ export class PageDetailComponent implements OnInit {
     });
   }
 
-  getTypeColor(type: string): string {
-    const colors: { [key: string]: string } = {
-      'DEFINITION': 'bg-blue-100 text-blue-800',
-      'SCHEMA': 'bg-green-100 text-green-800',
-      'WORKFLOW': 'bg-purple-100 text-purple-800',
-      'MAINTENANCE': 'bg-red-100 text-red-800',
-      'AUTRE': 'bg-gray-100 text-gray-800'
+  getTypeBadgeClass(color: string): string {
+    const map: Record<string, string> = {
+      blue:   'bg-blue-100 text-blue-800',
+      green:  'bg-green-100 text-green-800',
+      purple: 'bg-purple-100 text-purple-800',
+      red:    'bg-red-100 text-red-800',
+      orange: 'bg-orange-100 text-orange-800',
+      yellow: 'bg-yellow-100 text-yellow-800',
+      pink:   'bg-pink-100 text-pink-800',
+      gray:   'bg-gray-100 text-gray-700',
     };
-    return colors[type] || 'bg-gray-100 text-gray-800';
-  }
-
-  getTypeLabel(type: string): string {
-    const labels: { [key: string]: string } = {
-      'DEFINITION': 'Definition',
-      'SCHEMA': 'Schema',
-      'WORKFLOW': 'Workflow',
-      'MAINTENANCE': 'Maintenance',
-      'AUTRE': 'Other'
-    };
-    return labels[type] || type;
+    return map[color] || map['gray'];
   }
 }

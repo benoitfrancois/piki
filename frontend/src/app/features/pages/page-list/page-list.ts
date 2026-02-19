@@ -4,7 +4,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MarkdownModule } from 'ngx-markdown';
 import { PageService } from '../../../services/page.service';
-import { Page, TypePage, Tag } from '../../../models/page.model';
+import { Page, Type, Tag } from '../../../models/page.model';
 
 @Component({
   selector: 'app-page-list',
@@ -17,9 +17,10 @@ export class PageListComponent implements OnInit {
   allPages: Page[] = [];
   filteredPages: Page[] = [];
   allTags: Tag[] = [];
+  availableTypes: Type[] = [];
 
   searchQuery: string = '';
-  selectedType: string = 'ALL';
+  selectedType: Type | null = null;
   selectedTags: string[] = [];
 
   isLoading = true;
@@ -48,8 +49,16 @@ export class PageListComponent implements OnInit {
       }
     });
 
+    this.loadTypes();
     this.loadPages();
     this.loadTags();
+  }
+
+  loadTypes(): void {
+    this.pageService.getAllTypes().subscribe({
+      next: types => { this.availableTypes = types; this.cdr.detectChanges(); },
+      error: err => console.error('Error loading types:', err)
+    });
   }
 
   loadPages(): void {
@@ -95,8 +104,8 @@ export class PageListComponent implements OnInit {
     }
 
     // Filter by type
-    if (this.selectedType !== 'ALL') {
-      filtered = filtered.filter(page => page.type === this.selectedType);
+    if (this.selectedType !== null) {
+      filtered = filtered.filter(page => page.type?.id === this.selectedType!.id);
     }
 
     // Filter by tags
@@ -135,30 +144,26 @@ export class PageListComponent implements OnInit {
 
   clearFilters(): void {
     this.searchQuery = '';
-    this.selectedType = 'ALL';
+    this.selectedType = null;
     this.selectedTags = [];
     this.applyFilters();
   }
 
-  getTypeColor(type: string): string {
-    const colors: { [key: string]: string } = {
-      'DEFINITION': 'bg-blue-100 text-blue-800',
-      'SCHEMA': 'bg-green-100 text-green-800',
-      'WORKFLOW': 'bg-purple-100 text-purple-800',
-      'MAINTENANCE': 'bg-red-100 text-red-800',
-      'AUTRE': 'bg-gray-100 text-gray-800'
+  getTypeBadgeClass(color: string): string {
+    const map: Record<string, string> = {
+      blue:   'bg-blue-100 text-blue-800',
+      green:  'bg-green-100 text-green-800',
+      purple: 'bg-purple-100 text-purple-800',
+      red:    'bg-red-100 text-red-800',
+      orange: 'bg-orange-100 text-orange-800',
+      yellow: 'bg-yellow-100 text-yellow-800',
+      pink:   'bg-pink-100 text-pink-800',
+      gray:   'bg-gray-100 text-gray-700',
     };
-    return colors[type] || 'bg-gray-100 text-gray-800';
+    return map[color] || map['gray'];
   }
 
-  getTypeLabel(type: string): string {
-    const labels: { [key: string]: string } = {
-      'DEFINITION': 'Definition',
-      'SCHEMA': 'Schema',
-      'WORKFLOW': 'Workflow',
-      'MAINTENANCE': 'Maintenance',
-      'AUTRE': 'Other'
-    };
-    return labels[type] || type;
+  compareTypes(a: Type | null, b: Type | null): boolean {
+    return a?.id === b?.id;
   }
 }

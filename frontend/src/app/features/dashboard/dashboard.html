@@ -76,8 +76,8 @@
             <div *ngFor="let item of stats.byType | keyvalue"
                  class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <div class="flex items-center space-x-3">
-                <span [class]="getTypeColor(item.key) + ' px-3 py-1 rounded-full text-sm font-medium'">
-                  {{ getTypeLabel(item.key) }}
+                <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                  {{ item.key }}
                 </span>
               </div>
               <span class="text-2xl font-bold text-gray-700">{{ item.value }}</span>
@@ -133,8 +133,11 @@
               <div class="flex-1">
                 <h3 class="font-semibold text-gray-800 mb-1">{{ page.title }}</h3>
                 <div class="flex items-center space-x-2">
-                  <span [class]="getTypeColor(page.type) + ' px-2 py-1 rounded text-xs font-medium'">
-                    {{ getTypeLabel(page.type) }}
+                  <span *ngIf="page.type" [ngClass]="getTypeBadgeClass(page.type.color)" class="px-2 py-1 rounded text-xs font-medium">
+                    {{ page.type.icon }} {{ page.type.name }}
+                  </span>
+                  <span *ngIf="!page.type" class="bg-gray-100 text-gray-500 px-2 py-1 rounded text-xs font-medium">
+                    No type
                   </span>
                   <span class="text-xs text-gray-500">
                     Updated {{ page.updatedAt | date:'short' }}

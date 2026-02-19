@@ -1,26 +1,24 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Page, PageRequest, TypePage, Tag } from '../models/page.model';
+import { Page, PageRequest, Type, Tag } from '../models/page.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PageService {
   private apiUrl = '/api/pages';
+  private typeUrl = '/api/types';
 
   constructor(private http: HttpClient) {}
 
+  // ── Pages ──────────────────────────────────────────────
   getAllPages(): Observable<Page[]> {
     return this.http.get<Page[]>(this.apiUrl);
   }
 
   getPageById(id: number): Observable<Page> {
     return this.http.get<Page>(`${this.apiUrl}/${id}`);
-  }
-
-  getPagesByType(type: TypePage): Observable<Page[]> {
-    return this.http.get<Page[]>(`${this.apiUrl}/type/${type}`);
   }
 
   createPage(pageRequest: PageRequest): Observable<Page> {
@@ -40,7 +38,25 @@ export class PageService {
     return this.http.get<Page[]>(`${this.apiUrl}/search`, { params });
   }
 
+  // ── Tags ───────────────────────────────────────────────
   getAllTags(): Observable<Tag[]> {
     return this.http.get<Tag[]>(`${this.apiUrl}/tags`);
+  }
+
+  // ── Types ──────────────────────────────────────────────
+  getAllTypes(): Observable<Type[]> {
+    return this.http.get<Type[]>(this.typeUrl);
+  }
+
+  createType(name: string, color: string, icon: string): Observable<Type> {
+    return this.http.post<Type>(this.typeUrl, { name, color, icon });
+  }
+
+  updateType(id: number, name: string, color: string, icon: string): Observable<Type> {
+    return this.http.put<Type>(`${this.typeUrl}/${id}`, { name, color, icon });
+  }
+
+  deleteType(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.typeUrl}/${id}`);
   }
 }

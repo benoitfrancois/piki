@@ -1,8 +1,20 @@
+export interface Type {
+  id: number;
+  name: string;
+  color: string;   // "blue" | "green" | "purple" | "red" | "orange" | "yellow" | "pink" | "gray"
+  icon: string;    // emoji ex: "📖"
+}
+
+export interface Tag {
+  id?: number;
+  name: string;
+}
+
 export interface Page {
   id?: number;
   title: string;
   content: string;
-  type: TypePage;
+  type?: Type;
   tags: Tag[];
   createdAt?: string;
   updatedAt?: string;
@@ -11,19 +23,6 @@ export interface Page {
 export interface PageRequest {
   title: string;
   content: string;
-  type: TypePage;
+  type: Type | null;
   tags: string[];
-}
-
-export enum TypePage {
-  DEFINITION = 'DEFINITION',
-  SCHEMA = 'SCHEMA',
-  WORKFLOW = 'WORKFLOW',
-  MAINTENANCE = 'MAINTENANCE',
-  AUTRE = 'AUTRE'
-}
-
-export interface Tag {
-  id?: number;
-  name: string;
 }

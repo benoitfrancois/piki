@@ -26,6 +26,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/pages/page-form/page-form').then(m => m.PageFormComponent)
   },
   {
+    path: 'admin',
+    loadComponent: () => import('./features/admin/admin').then(m => m.AdminComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

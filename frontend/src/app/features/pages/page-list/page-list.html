@@ -111,8 +111,11 @@
       >
         <!-- Type Badge -->
         <div class="flex items-center justify-between mb-3">
-          <span [class]="getTypeColor(page.type) + ' px-3 py-1 rounded-full text-xs font-semibold'">
-            {{ getTypeLabel(page.type) }}
+          <span *ngIf="page.type" [ngClass]="getTypeBadgeClass(page.type.color)" class="px-3 py-1 rounded-full text-xs font-semibold">
+            {{ page.type.icon }} {{ page.type.name }}
+          </span>
+          <span *ngIf="!page.type" class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-xs font-semibold">
+            No type
           </span>
           <span class="text-xs text-gray-500">
             {{ page.updatedAt | date:'short' }}

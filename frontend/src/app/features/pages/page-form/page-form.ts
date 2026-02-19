@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { PageService } from '../../../services/page.service';
-import { Page, PageRequest, TypePage } from '../../../models/page.model';
+import { Page, PageRequest, Type } from '../../../models/page.model';
 
 @Component({
   selector: 'app-page-form',
@@ -26,18 +26,11 @@ export class PageFormComponent implements OnInit {
   // Form data
   title: string = '';
   content: string = '';
-  type: TypePage = TypePage.DEFINITION;
+  selectedType: Type | null = null;
   tags: string[] = [];
   tagInput: string = '';
 
-  // Available types
-  pageTypes = [
-    { value: TypePage.DEFINITION, label: 'Definition' },
-    { value: TypePage.SCHEMA, label: 'Schema' },
-    { value: TypePage.WORKFLOW, label: 'Workflow' },
-    { value: TypePage.MAINTENANCE, label: 'Maintenance' },
-    { value: TypePage.AUTRE, label: 'Other' }
-  ];
+  availableTypes: Type[] = [];
 
   constructor(
     private pageService: PageService,
@@ -45,15 +38,13 @@ export class PageFormComponent implements OnInit {
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private http: HttpClient
-  ) {
-    console.log('PageService:', this.pageService);
-    console.log('Router:', this.router);
-    console.log('Route:', this.route);
-    console.log('ChangeDetectorRef:', this.cdr);
-  }
+  ) {}
 
   ngOnInit(): void {
-    // Check if we're in edit mode
+    this.pageService.getAllTypes().subscribe({
+      next: types => this.availableTypes = types
+    });
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode = true;
@@ -64,27 +55,20 @@ export class PageFormComponent implements OnInit {
 
   loadPage(): void {
     if (!this.pageId) return;
-
     this.isLoading = true;
-
     this.cdr.detectChanges();
-
-
     this.pageService.getPageById(this.pageId).subscribe({
       next: (page) => {
-
         this.title = page.title;
         this.content = page.content;
-        this.type = page.type;
+        this.selectedType = page.type ?? null;
         this.tags = page.tags.map(tag => tag.name);
         this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Error loading page:', error);
         this.isLoading = false;
         this.cdr.detectChanges();
-        alert('Error loading page');
         this.router.navigate(['/pages']);
       }
     });
@@ -169,7 +153,7 @@ export class PageFormComponent implements OnInit {
     const pageRequest: PageRequest = {
       title: this.title.trim(),
       content: this.content.trim(),
-      type: this.type,
+      type: this.selectedType,
       tags: this.tags
     };
 
@@ -208,5 +192,9 @@ export class PageFormComponent implements OnInit {
     } else {
       this.router.navigate(['/pages']);
     }
+  }
+
+  compareTypes(a: Type | null, b: Type | null): boolean {
+    return a?.id === b?.id;
   }
 }
