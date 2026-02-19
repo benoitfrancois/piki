@@ -30,6 +30,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/admin/admin').then(m => m.AdminComponent)
   },
   {
+    path: 'import-export',
+    loadComponent: () => import('./features/import-export/import-export')
+      .then(m => m.ImportExportComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

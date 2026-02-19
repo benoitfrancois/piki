@@ -94,7 +94,7 @@ public class PageService {
         return typeRepository.findById(dtoType.getId());
     }
 
-    private Set<Tag> findOrCreateTags(Set<String> tagNames) {
+    private Set<Tag> findOrCreateTags(List<String> tagNames) {
         Set<Tag> tags = new HashSet<>();
         for (String tagName : tagNames) {
             String normalizedName = tagName.toLowerCase().trim();

@@ -1,0 +1,274 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+  <div class="container mx-auto px-4">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Import / Export</h1>
+      <p class="text-gray-600">Transfer your pages and images</p>
+    </div>
+
+    <!-- Main grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+      <!-- ═══════════════════════════════════════════════════
+           EXPORT
+      ════════════════════════════════════════════════════ -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          📤 Export
+          <span *ngIf="selectedPages.length > 0"
+                class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full">
+            {{ selectedPages.length }} selected
+          </span>
+        </h2>
+
+        <!-- Search filter -->
+        <div class="relative mb-3">
+          <input
+            type="text"
+            [(ngModel)]="exportFilterQuery"
+            placeholder="Filter pages..."
+            class="w-full px-3 py-2 pl-8 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50"
+          />
+          <span class="absolute left-2.5 top-2.5 text-gray-400 text-xs">🔍</span>
+          <button *ngIf="exportFilterQuery" (click)="exportFilterQuery = ''"
+                  class="absolute right-2.5 top-2 text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="isLoadingPages" class="text-center py-8 text-gray-400 text-sm">Loading pages...</div>
+
+        <div *ngIf="!isLoadingPages">
+
+          <!-- Selected pages section -->
+          <div *ngIf="selectedPages.length > 0" class="mb-3">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-xs font-semibold text-blue-600 uppercase tracking-wide">
+                ✓ Selected for export
+              </p>
+              <button (click)="clearExportSelection()"
+                      class="text-xs text-gray-400 hover:text-red-500 transition-colors">
+                Clear all
+              </button>
+            </div>
+            <ul class="space-y-1 mb-3">
+              <li *ngFor="let page of selectedPages"
+                  class="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                <input type="checkbox" [checked]="true" (change)="deselectPage(page)"
+                       class="rounded text-blue-600 cursor-pointer" />
+                <span class="flex-1 text-sm font-medium text-gray-700 truncate">{{ page.title }}</span>
+                <span *ngIf="page.type"
+                      class="text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0"
+                      [ngClass]="getTypeBadgeClass(page.type.color)">
+                  {{ page.type.icon }} {{ page.type.name }}
+                </span>
+              </li>
+            </ul>
+            <div class="border-t border-gray-200 my-3"></div>
+          </div>
+
+          <!-- Unselected pages -->
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Available pages ({{ unselectedFilteredPages.length }})
+            </p>
+            <button
+              *ngIf="unselectedFilteredPages.length > 0"
+              (click)="toggleSelectAllUnselected()"
+              class="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors">
+              {{ allUnselectedChecked ? 'Deselect all' : 'Select all' }}
+            </button>
+          </div>
+
+          <div *ngIf="unselectedFilteredPages.length === 0 && allPages.length > 0"
+               class="text-gray-400 text-sm text-center py-4">
+            {{ exportFilterQuery ? 'No results.' : 'All pages selected.' }}
+          </div>
+
+          <ul class="space-y-1 max-h-64 overflow-y-auto">
+            <li *ngFor="let page of unselectedFilteredPages"
+                class="flex items-center gap-2 hover:bg-gray-50 rounded-lg px-3 py-2 cursor-pointer transition-colors"
+                (click)="toggleExportPage(page)">
+              <input type="checkbox" [checked]="page.selected"
+                     class="rounded text-blue-600 cursor-pointer" (click)="$event.stopPropagation()" (change)="toggleExportPage(page)" />
+              <span class="flex-1 text-sm text-gray-700 truncate">{{ page.title }}</span>
+              <span *ngIf="page.type"
+                    class="text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0"
+                    [ngClass]="getTypeBadgeClass(page.type.color)">
+                {{ page.type.icon }} {{ page.type.name }}
+              </span>
+              <div *ngIf="page.tags.length > 0" class="flex gap-1">
+                <span *ngFor="let tag of page.tags.slice(0, 2)"
+                      class="text-xs text-gray-400">#{{ tag.name }}</span>
+              </div>
+            </li>
+          </ul>
+
+          <!-- Export button -->
+          <button
+            (click)="exportSelected()"
+            [disabled]="selectedPages.length === 0 || isExporting"
+            class="mt-4 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+            <span *ngIf="!isExporting">⬇️ Export {{ selectedPages.length > 0 ? selectedPages.length + ' page(s)' : '' }} as ZIP</span>
+            <span *ngIf="isExporting">Exporting...</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════
+           IMPORT
+      ════════════════════════════════════════════════════ -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">📥 Import</h2>
+
+        <!-- Drop zone -->
+        <div *ngIf="!importFile"
+             class="border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer"
+             [class.border-blue-400]="isDragOver"
+             [class.bg-blue-50]="isDragOver"
+             [class.border-gray-300]="!isDragOver"
+             (dragover)="onDragOver($event)"
+             (dragleave)="onDragLeave()"
+             (drop)="onDrop($event)"
+             (click)="fileInput.click()">
+          <p class="text-4xl mb-3">📂</p>
+          <p class="text-gray-600 font-medium mb-1">Drop your file here</p>
+          <p class="text-gray-400 text-sm">or click to browse</p>
+          <p class="text-gray-400 text-xs mt-2">.zip (with images) or .json</p>
+          <input #fileInput type="file" accept=".zip,.json" class="hidden" (change)="onFileSelected($event)" />
+        </div>
+
+        <!-- File loaded -->
+        <div *ngIf="importFile">
+
+          <!-- File info -->
+          <div class="flex items-center gap-2 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <span class="text-xl">{{ importFile.name.endsWith('.zip') ? '🗜️' : '📄' }}</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-700 truncate">{{ importFile.name }}</p>
+              <p class="text-xs text-gray-400">{{ (importFile.size / 1024).toFixed(1) }} KB</p>
+            </div>
+            <button (click)="resetImport()" class="text-gray-400 hover:text-red-500 text-lg">×</button>
+          </div>
+
+          <!-- Checking duplicates -->
+          <div *ngIf="isCheckingDuplicates" class="text-center py-6 text-gray-400 text-sm">
+            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mb-2"></div>
+            <p>Checking for duplicates...</p>
+          </div>
+
+          <!-- Error -->
+          <div *ngIf="importError" class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+            <p class="text-red-600 text-sm">❌ {{ importError }}</p>
+          </div>
+
+          <!-- Import result -->
+          <div *ngIf="importResult" class="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+            <p class="text-green-700 font-semibold text-sm">✅ {{ importResult.message }}</p>
+            <p class="text-green-600 text-xs mt-1">
+              {{ importResult.imported }} imported &nbsp;·&nbsp;
+              {{ importResult.skipped }} skipped &nbsp;·&nbsp;
+              {{ importResult.overwritten }} overwritten
+            </p>
+          </div>
+
+          <!-- Pages list -->
+          <div *ngIf="!isCheckingDuplicates && importPages.length > 0 && !importResult">
+
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                {{ importPages.length }} page(s) found
+              </p>
+              <button (click)="toggleAllImport()"
+                      class="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                {{ allImportChecked ? 'Deselect all' : 'Select all' }}
+              </button>
+            </div>
+
+            <ul class="space-y-1 max-h-52 overflow-y-auto mb-4">
+              <li *ngFor="let page of importPages"
+                  class="flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer transition-colors"
+                  [class.bg-amber-50]="page.isDuplicate"
+                  [class.hover:bg-amber-100]="page.isDuplicate"
+                  [class.hover:bg-gray-50]="!page.isDuplicate"
+                  (click)="page.selected = !page.selected">
+                <input type="checkbox" [(ngModel)]="page.selected"
+                       class="rounded text-blue-600 cursor-pointer" (click)="$event.stopPropagation()" />
+                <span class="flex-1 text-sm text-gray-700 truncate">{{ page.title }}</span>
+                <span *ngIf="page.isDuplicate"
+                      class="text-xs text-amber-600 font-semibold flex-shrink-0"
+                      title="A page with this title already exists">⚠️ duplicate</span>
+                <span *ngIf="page.typeName"
+                      class="text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0"
+                      [ngClass]="getTypeBadgeClass(page.typeColor || 'gray')">
+                  {{ page.typeIcon }} {{ page.typeName }}
+                </span>
+              </li>
+            </ul>
+
+            <!-- Options -->
+            <div class="bg-gray-50 rounded-lg p-3 mb-4 border border-gray-200">
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Duplicate handling
+              </p>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" [(ngModel)]="importOption" value="skip"
+                         class="text-blue-600" />
+                  <span class="text-sm text-gray-700">Skip duplicates</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" [(ngModel)]="importOption" value="overwrite"
+                         class="text-blue-600" />
+                  <span class="text-sm text-gray-700">Overwrite duplicates</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Import button -->
+            <button
+              (click)="doImport()"
+              [disabled]="selectedImportPages.length === 0 || isImporting"
+              class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition-colors">
+              <span *ngIf="!isImporting">⬆️ Import {{ selectedImportPages.length }} page(s)</span>
+              <span *ngIf="isImporting">Importing...</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         HISTORY
+    ════════════════════════════════════════════════════ -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-800">📋 History</h2>
+        <button *ngIf="history.length > 0" (click)="clearHistory()"
+                class="text-xs text-gray-400 hover:text-red-500 transition-colors">
+          Clear history
+        </button>
+      </div>
+
+      <div *ngIf="history.length === 0" class="text-center py-6 text-gray-400 text-sm">
+        No operations yet.
+      </div>
+
+      <ul *ngIf="history.length > 0" class="space-y-2">
+        <li *ngFor="let entry of history"
+            class="flex items-center gap-3 p-3 rounded-lg border border-gray-100">
+          <span class="text-xl">{{ entry.action === 'export' ? '📤' : '📥' }}</span>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-700">{{ entry.detail }}</p>
+            <p class="text-xs text-gray-400">{{ entry.date }}</p>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full"
+                [class]="entry.action === 'export' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'">
+            {{ entry.action }}
+          </span>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+</div>
