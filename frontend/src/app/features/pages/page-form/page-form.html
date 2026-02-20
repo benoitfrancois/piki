@@ -19,11 +19,11 @@
     <!-- Form -->
     <form *ngIf="!isLoading" (ngSubmit)="onSubmit()" class="bg-white rounded-lg shadow-md">
       <div
-        class="relative rounded-t-lg px-6 pb-4 pt-8 overflow-hidden transition-colors duration-300"
+        class="relative rounded-t-lg px-6 pb-4 pt-8 h-[84px] overflow-hidden transition-colors duration-300"
         [ngClass]="getHeaderColor(selectedType?.color)">
 
-        <span class="absolute top-0 left-4 translate-y-1/4
-                     text-white font-bold text-4xl leading-none
+        <span class="absolute top-0 left-4 translate-y-7
+                     text-white font-bold text-7xl leading-none
                      drop-shadow-sm whitespace-nowrap">
           {{ selectedType?.name || 'No type' }}
         </span>
@@ -31,10 +31,6 @@
         <span class="absolute top-2 right-4 text-white text-xs opacity-75">
           {{ isEditMode ? 'Edit mode' : 'New page' }}
         </span>
-
-        <h2 class="text-xl font-bold text-white opacity-90 mt-2">
-          {{ title || (isEditMode ? 'Edit page' : 'New page') }}
-        </h2>
       </div>
 
       <div class="p-8">

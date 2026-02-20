@@ -11,16 +11,34 @@
     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">New type</p>
     <div class="flex gap-2 flex-wrap">
       <input type="text" [(ngModel)]="newName" placeholder="Type name..."
-             class="flex-1 min-w-32 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+             class="flex-1 min-w-32 px-3 py-2 h-10 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
       <input type="text" [(ngModel)]="newIcon" placeholder="📄" maxlength="4"
-             class="w-16 text-center px-2 py-2 border border-slate-200 rounded-lg text-lg focus:outline-none" />
-      <select [(ngModel)]="newColor"
-              class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none bg-white">
-        <option *ngFor="let c of colorOptions" [value]="c.value">{{ c.label }}</option>
-      </select>
+             class="w-16 text-center px-2 py-2 h-10 border border-slate-200 rounded-lg text-lg focus:outline-none" />
+      <!-- Color picker custom — creation -->
+      <div class="relative">
+        <button type="button" (click)="showColorPicker = !showColorPicker"
+                class="flex items-center gap-2 px-3 py-2 h-10 border border-slate-200 rounded-lg text-sm focus:outline-none bg-white min-w-28">
+          <span class="w-4 h-4 rounded-full inline-block flex-shrink-0" [ngClass]="getDotClass(newColor)"></span>
+          <span>{{ getColorLabel(newColor) }}</span>
+          <svg class="w-4 h-4 ml-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div *ngIf="showColorPicker"
+             class="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-28">
+          <button *ngFor="let c of colorOptions" type="button"
+                  (click)="newColor = c.value; showColorPicker = false"
+                  class="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-gray-50 text-sm">
+            <span class="w-4 h-4 rounded-full flex-shrink-0" [ngClass]="getDotClass(c.value)"></span>
+            <span>{{ c.label }}</span>
+          </button>
+        </div>
+      </div>
       <button (click)="create()"
-              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
-        Add
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 h-10 rounded-lg text-sm font-semibold transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
       </button>
     </div>
     <!-- Preview -->
@@ -76,15 +94,30 @@
       </div>
       <!-- Edit mode -->
       <div *ngIf="editingId === t.id" class="col-span-2 rounded-xl border-2 border-indigo-400 p-3 bg-indigo-50">
-        <div class="flex gap-2 flex-wrap mb-2">
+        <div class="flex gap-2 items-center mb-2">
           <input type="text" [(ngModel)]="editName" (keyup.enter)="saveEdit(t)"
-                 class="flex-1 min-w-32 px-3 py-2 border border-indigo-300 rounded-lg text-sm focus:outline-none bg-white" />
+                 class="flex-1 min-w-32 px-3 py-2 h-10 border border-indigo-300 rounded-lg text-sm focus:outline-none bg-white" />
           <input type="text" [(ngModel)]="editIcon" maxlength="4"
-                 class="w-16 text-center px-2 py-2 border border-indigo-300 rounded-lg text-lg focus:outline-none bg-white" />
-          <select [(ngModel)]="editColor"
-                  class="px-3 py-2 border border-indigo-300 rounded-lg text-sm focus:outline-none bg-white">
-            <option *ngFor="let c of colorOptions" [value]="c.value">{{ c.label }}</option>
-          </select>
+                 class="w-12 text-center px-2 py-2 h-10 border border-indigo-300 rounded-lg text-lg focus:outline-none bg-white" />
+          <div class="relative">
+            <button type="button" (click)="showEditColorPicker = !showEditColorPicker"
+                    class="flex items-center gap-2 px-3 py-2 h-10 border border-slate-200 rounded-lg text-sm focus:outline-none bg-white min-w-28">
+              <span class="w-4 h-4 rounded-full inline-block flex-shrink-0" [ngClass]="getDotClass(editColor)"></span>
+              <span>{{ getColorLabel(editColor) }}</span>
+              <svg class="w-4 h-4 ml-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div *ngIf="showEditColorPicker"
+                 class="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-28">
+              <button *ngFor="let c of colorOptions" type="button"
+                      (click)="editColor = c.value; showEditColorPicker = false"
+                      class="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-gray-50 text-sm">
+                <span class="w-4 h-4 rounded-full flex-shrink-0" [ngClass]="getDotClass(c.value)"></span>
+                <span>{{ c.label }}</span>
+              </button>
+            </div>
+          </div>
         </div>
         <div class="flex gap-2 justify-end">
           <button (click)="saveEdit(t)"

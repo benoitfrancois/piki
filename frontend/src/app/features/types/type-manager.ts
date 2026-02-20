@@ -28,15 +28,18 @@ export class TypeManagerComponent implements OnInit {
   editIcon = '📄';
 
   colorOptions = [
-    { value: 'blue',   label: '🔵 Bleu'   },
-    { value: 'green',  label: '🟢 Vert'   },
-    { value: 'purple', label: '🟣 Violet' },
-    { value: 'red',    label: '🔴 Rouge'  },
-    { value: 'orange', label: '🟠 Orange' },
-    { value: 'yellow', label: '🟡 Jaune'  },
-    { value: 'pink',   label: '🩷 Rose'   },
-    { value: 'gray',   label: '⚫ Gris'   },
+    { value: 'blue',   label: 'Blue'   },
+    { value: 'green',  label: 'Green'  },
+    { value: 'purple', label: 'Purple' },
+    { value: 'red',    label: 'Red'    },
+    { value: 'orange', label: 'Orange' },
+    { value: 'yellow', label: 'Yellow' },
+    { value: 'pink',   label: 'Pink'   },
+    { value: 'gray',   label: 'Gray'   },
   ];
+
+  showColorPicker = false;
+  showEditColorPicker = false;
 
   constructor(
     private pageService: PageService,
@@ -87,6 +90,7 @@ export class TypeManagerComponent implements OnInit {
         this.newName = '';
         this.newColor = 'gray';
         this.newIcon = '📄';
+        this.applyFilter();
         this.cdr.detectChanges();
       },
       error: err => {
@@ -113,6 +117,7 @@ export class TypeManagerComponent implements OnInit {
         const i = this.types.findIndex(x => x.id === t.id);
         if (i !== -1) this.types[i] = updated;
         this.types = [...this.types];
+        this.applyFilter();
         this.cancelEdit();
         this.cdr.detectChanges();
       },
@@ -125,6 +130,7 @@ export class TypeManagerComponent implements OnInit {
     this.pageService.deleteType(t.id).subscribe({
       next: () => {
         this.types = this.types.filter(x => x.id !== t.id);
+        this.applyFilter();
         this.cdr.detectChanges();
         },
       error: err => {
@@ -145,5 +151,23 @@ export class TypeManagerComponent implements OnInit {
       gray:   { badge: 'bg-gray-100 text-gray-700',    card: 'bg-gray-50 border-gray-200',    text: 'text-gray-700' },
     };
     return (map[color] || map['gray'])[variant];
+  }
+
+  getDotClass(color: string): string {
+    const map: Record<string, string> = {
+      blue:   'bg-blue-500',
+      green:  'bg-green-500',
+      purple: 'bg-purple-500',
+      red:    'bg-red-500',
+      orange: 'bg-orange-500',
+      yellow: 'bg-yellow-400',
+      pink:   'bg-pink-500',
+      gray:   'bg-gray-500',
+    };
+    return map[color] || 'bg-gray-500';
+  }
+
+  getColorLabel(value: string): string {
+    return this.colorOptions.find(c => c.value === value)?.label || value;
   }
 }

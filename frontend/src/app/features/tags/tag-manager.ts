@@ -64,6 +64,7 @@ export class TagManagerComponent implements OnInit {
       next: tag => {
         this.tags = [...this.tags, tag].sort((a, b) => a.name.localeCompare(b.name));
         this.newName = '';
+        this.applyFilter();
         this.cdr.detectChanges();
         },
       error: err => {

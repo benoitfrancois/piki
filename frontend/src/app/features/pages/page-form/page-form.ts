@@ -42,7 +42,10 @@ export class PageFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.pageService.getAllTypes().subscribe({
-      next: types => this.availableTypes = types
+      next: types => {
+        this.availableTypes = types;
+        this.cdr.detectChanges();
+      }
     });
 
     const id = this.route.snapshot.paramMap.get('id');
