@@ -26,7 +26,8 @@ public class SecuritySetupService {
     @Value("${piki.security.recovery-key}")
     private String currentRecoveryKey;
 
-    private static final String PROPERTIES_FILE = "./application.properties";
+    @Value("${piki.config.file:./application.properties}")
+    private String propertiesFilePath;
 
     // ── State ─────────────────────────────────────────────────────────────────
 
@@ -99,7 +100,7 @@ public class SecuritySetupService {
         Properties props = new Properties();
 
         // Read the existing file
-        try (FileInputStream fis = new FileInputStream(PROPERTIES_FILE)) {
+        try (FileInputStream fis = new FileInputStream(propertiesFilePath)) {
             props.load(fis);
         }
 
@@ -109,7 +110,7 @@ public class SecuritySetupService {
         props.setProperty("piki.security.configured", configuredValue);
 
         // Write
-        try (FileOutputStream fos = new FileOutputStream(PROPERTIES_FILE)) {
+        try (FileOutputStream fos = new FileOutputStream(propertiesFilePath)) {
             props.store(fos, "Piki Security Configuration — do not edit manually");
         }
     }
