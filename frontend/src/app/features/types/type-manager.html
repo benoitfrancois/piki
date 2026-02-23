@@ -16,7 +16,7 @@
              class="w-16 text-center px-2 py-2 h-10 border border-slate-200 rounded-lg text-lg focus:outline-none" />
       <!-- Color picker custom — creation -->
       <div class="relative">
-        <button type="button" (click)="showColorPicker = !showColorPicker"
+        <button type="button" (click)="toggleColorPicker(); $event.stopPropagation()"
                 class="flex items-center gap-2 px-3 py-2 h-10 border border-slate-200 rounded-lg text-sm focus:outline-none bg-white min-w-28">
           <span class="w-4 h-4 rounded-full inline-block flex-shrink-0" [ngClass]="getDotClass(newColor)"></span>
           <span>{{ getColorLabel(newColor) }}</span>
@@ -27,7 +27,7 @@
         <div *ngIf="showColorPicker"
              class="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-28">
           <button *ngFor="let c of colorOptions" type="button"
-                  (click)="newColor = c.value; showColorPicker = false"
+                  (click)="newColor = c.value; showColorPicker = false; $event.stopPropagation()"
                   class="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-gray-50 text-sm">
             <span class="w-4 h-4 rounded-full flex-shrink-0" [ngClass]="getDotClass(c.value)"></span>
             <span>{{ c.label }}</span>
@@ -100,8 +100,8 @@
           <input type="text" [(ngModel)]="editIcon" maxlength="4"
                  class="w-12 text-center px-2 py-2 h-10 border border-indigo-300 rounded-lg text-lg focus:outline-none bg-white" />
           <div class="relative">
-            <button type="button" (click)="showEditColorPicker = !showEditColorPicker"
-                    class="flex items-center gap-2 px-3 py-2 h-10 border border-slate-200 rounded-lg text-sm focus:outline-none bg-white min-w-28">
+            <button type="button" (click)="toggleEditColorPicker(); $event.stopPropagation()"
+                    class="flex items-center gap-2 px-3 py-2 h-10 border border-indigo-300 rounded-lg text-sm focus:outline-none bg-white min-w-28">
               <span class="w-4 h-4 rounded-full inline-block flex-shrink-0" [ngClass]="getDotClass(editColor)"></span>
               <span>{{ getColorLabel(editColor) }}</span>
               <svg class="w-4 h-4 ml-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -111,7 +111,7 @@
             <div *ngIf="showEditColorPicker"
                  class="absolute z-10 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-28">
               <button *ngFor="let c of colorOptions" type="button"
-                      (click)="editColor = c.value; showEditColorPicker = false"
+                      (click)="editColor = c.value; showEditColorPicker = false; $event.stopPropagation()"
                       class="flex items-center gap-2 w-full px-3 py-1.5 hover:bg-gray-50 text-sm">
                 <span class="w-4 h-4 rounded-full flex-shrink-0" [ngClass]="getDotClass(c.value)"></span>
                 <span>{{ c.label }}</span>

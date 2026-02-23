@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -23,7 +23,11 @@ export class ResetPasswordComponent {
   errorMsg = '';
   isLoading = false;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   verifyKey(): void {
     if (!this.recoveryKey.trim()) return;
@@ -40,10 +44,12 @@ export class ResetPasswordComponent {
           this.errorMsg = 'Invalid recovery key';
         }
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMsg = 'Verification failed';
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -69,10 +75,12 @@ export class ResetPasswordComponent {
         this.newRecoveryKey = res.recoveryKey;
         this.step = 'new-recovery-key';
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: err => {
         this.errorMsg = err.error?.error || 'Reset failed';
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

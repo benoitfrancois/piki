@@ -98,4 +98,8 @@ export class PageDetailComponent implements OnInit {
     };
     return map[color ?? ''] || 'bg-blue-600';
   }
+
+  printPage(): void {
+    window.print();
+  }
 }

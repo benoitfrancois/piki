@@ -22,7 +22,7 @@ export const routes: Routes = [
   // Protected
   {
     path: '',
-    loadComponent: () => import('./features/dashboard/dashboard').then(m => m.DashboardComponent),
+    loadComponent: () => import('./features/home/home').then(m => m.HomeComponent),
     canActivate: [AuthGuard]
   },
   {

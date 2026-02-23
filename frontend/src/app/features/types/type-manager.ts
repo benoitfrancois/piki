@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PageService } from '../../services/page.service';
@@ -169,5 +169,25 @@ export class TypeManagerComponent implements OnInit {
 
   getColorLabel(value: string): string {
     return this.colorOptions.find(c => c.value === value)?.label || value;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.color-picker-wrapper')) {
+      this.showColorPicker = false;
+      this.showEditColorPicker = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  toggleColorPicker(): void {
+    this.showColorPicker = !this.showColorPicker;
+    this.showEditColorPicker = false;
+  }
+
+  toggleEditColorPicker(): void {
+    this.showEditColorPicker = !this.showEditColorPicker;
+    this.showColorPicker = false;
   }
 }

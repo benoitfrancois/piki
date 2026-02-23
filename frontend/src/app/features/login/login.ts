@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -16,7 +16,11 @@ export class LoginComponent {
   errorMsg = '';
   isLoading = false;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   onLogin(): void {
     if (!this.password.trim()) return;
@@ -24,11 +28,12 @@ export class LoginComponent {
     this.errorMsg = '';
 
     this.auth.login(this.password).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => this.router.navigate(['/home']),
       error: () => {
         this.errorMsg = 'Incorrect password';
         this.isLoading = false;
         this.password = '';
+        this.cdr.detectChanges();
       }
     });
   }
