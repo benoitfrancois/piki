@@ -53,7 +53,8 @@ public class PageService {
         resolveType(dto.getType()).ifPresent(page::setType);
 
         if (dto.getTags() != null && !dto.getTags().isEmpty()) {
-            findOrCreateTags(dto.getTags()).forEach(page::addTag);
+            Set<Tag> resolvedTags = findOrCreateTags(dto.getTags());
+            resolvedTags.forEach(page::addTag);
         }
 
         return pageRepository.save(page);
@@ -96,8 +97,12 @@ public class PageService {
 
     private Set<Tag> findOrCreateTags(List<String> tagNames) {
         Set<Tag> tags = new HashSet<>();
+        Set<String> seen = new HashSet<>();
+
         for (String tagName : tagNames) {
             String normalizedName = tagName.toLowerCase().trim();
+            if (!seen.add(normalizedName)) continue;
+
             Tag tag = tagRepository.findByNameIgnoreCase(normalizedName)
                     .orElseGet(() -> tagRepository.save(new Tag(normalizedName)));
             tags.add(tag);
