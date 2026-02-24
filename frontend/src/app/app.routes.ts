@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
 import { SetupGuard } from './guards/setup.guard';
+import {RecoveryKeyComponent } from './features/recovery-key/recovery-key';
 
 export const routes: Routes = [
   // Public — setup
@@ -19,6 +20,12 @@ export const routes: Routes = [
     path: 'reset-password',
     loadComponent: () => import('./features/reset-password/reset-password').then(m => m.ResetPasswordComponent)
   },
+  // Public - recovery-key
+  {
+    path: 'recovery-key',
+    component: RecoveryKeyComponent
+  },
+
   // Protected
   {
     path: '',

@@ -28,13 +28,19 @@ public class SetupController {
         }
 
         String password = body.get("password");
+        String dbPassword = body.get("dbPassword");
+
         if (password == null || password.length() < 6) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Password must be at least 6 characters"));
         }
+        if (dbPassword == null || dbPassword.length() < 6) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "DB password must be at least 6 characters"));
+        }
 
         try {
-            String recoveryKey = setupService.setup(password);
+            String recoveryKey = setupService.setup(password, dbPassword);
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "recoveryKey", recoveryKey

@@ -225,7 +225,15 @@ public class ImportExportController {
 
         // Match type by name
         if (dto.getTypeName() != null) {
-            typeRepository.findByNameIgnoreCase(dto.getTypeName()).ifPresent(req::setType);
+            Type type = typeRepository.findByNameIgnoreCase(dto.getTypeName())
+                    .orElseGet(() -> {
+                        Type newType = new Type();
+                        newType.setName(dto.getTypeName());
+                        newType.setColor(dto.getTypeColor() != null ? dto.getTypeColor() : "gray");
+                        newType.setIcon(dto.getTypeIcon() != null ? dto.getTypeIcon() : "📄");
+                        return typeRepository.save(newType);
+                    });
+            req.setType(type);
         }
 
         return req;

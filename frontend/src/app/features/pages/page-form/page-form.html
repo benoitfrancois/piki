@@ -162,6 +162,7 @@
             type="submit"
             [disabled]="isSaving"
             class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-lg font-semibold transition"
+            [ngClass]="getHeaderColor(selectedType?.color)"
           >
             {{ isSaving ? 'Saving...' : (isEditMode ? 'Update Page' : 'Create Page') }}
           </button>

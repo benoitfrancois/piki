@@ -15,13 +15,13 @@ export class AppComponent  {
   title = 'PersonalWiki';
 
   showHeader = false;
-  private readonly noHeaderRoutes = ['/login', '/setup', '/reset-password'];
+  private readonly noHeaderRoutes = ['/login', '/setup', '/reset-password', '/recovery-key'];
 
   constructor(private router: Router) {
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd)
     ).subscribe((e: NavigationEnd) => {
-      const url = e.urlAfterRedirects.split('?')[0]; // ← ignorer les query params
+      const url = e.urlAfterRedirects.split('?')[0]; // ← ignore the query params
       this.showHeader = !this.noHeaderRoutes.some(r => url.startsWith(r));
     });
   }

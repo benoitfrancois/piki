@@ -1,18 +1,18 @@
 #Piki Security Configuration \u2014 do not edit manually
-#Tue Feb 24 09:46:03 CET 2026
+#Tue Feb 24 01:51:55 CET 2026
 jasypt.encryptor.password=${JASYPT_ENCRYPTOR_PASSWORD}
 logging.level.com.personalwiki=DEBUG
 logging.level.root=WARN
 piki.config.file=src/main/resources/application.properties
-piki.security.configured=true
-piki.security.password=ENC(hDK/Ae8tkFdi+CtnCt5mZnQILCQH+bIsOhrFVzUGoZUsRmaf3KvRfg+Rl8M6R7As)
-piki.security.recovery-key=ENC(WGe9omBvlMSxR14Ic5wqgk74S5gwrtxpS+Tn2tHmQKJduAYPoznibiNrB22tXLZVXqd4mwVQv6hTky/B2671+A\=\=)
+piki.security.configured=false
+piki.security.password=CHANGE_ME
+piki.security.recovery-key=CHANGE_ME
 server.port=8080
 server.servlet.session.cookie.http-only=true
 server.servlet.session.timeout=30m
 spring.application.name=Piki
 spring.datasource.driverClassName=org.h2.Driver
-spring.datasource.password=ENC(IjXdUWQHe9U22oqcN38FqnPNaQOyEDlLKT6YcFaEf5DBRUATThTJusGKthlgbFtIHGVAtm8rvc7nfxT7/5h6Jg\=\=)
+spring.datasource.password=CHANGE_ME
 spring.datasource.url=jdbc\:h2\:file\:./data/h2-db/personalwiki
 spring.datasource.username=sa
 spring.h2.console.enabled=true

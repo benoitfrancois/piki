@@ -8,6 +8,11 @@ import org.springframework.stereotype.Service;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -16,6 +21,8 @@ import java.util.UUID;
 public class SecuritySetupService {
 
     private final StringEncryptor encryptor;
+
+    private final DataSource dataSource;
 
     @Value("${piki.security.configured}")
     private String configured;
@@ -47,23 +54,41 @@ public class SecuritySetupService {
 
     /**
      * Configures the password and generates a backup key.
-     * Writes the encrypted values to application.properties.
+     * Writes the encrypted values to application.properties.back.
      * @return the backup key in plain text (to be displayed only once)
      */
-    public String setup(String password) throws IOException {
-        String recoveryKey = generateRecoveryKey();
+    public String setup(String password, String dbPassword) throws Exception {
+        // 1. Change password H2
+        changeH2Password(dbPassword);
 
-        String encryptedPassword = "ENC(" + encryptor.encrypt(password) + ")";
+        // 2. Encrypt and back up
+        String recoveryKey          = generateRecoveryKey();
+        String encryptedPassword    = "ENC(" + encryptor.encrypt(password) + ")";
         String encryptedRecoveryKey = "ENC(" + encryptor.encrypt(recoveryKey) + ")";
 
-        updateProperties(encryptedPassword, encryptedRecoveryKey, "true");
+        // Format required by H2 CIPHER=AES: "filePassword userPassword"
+        String h2FullPassword      = dbPassword + " " + dbPassword;
+        String encryptedDbPassword = "ENC(" + encryptor.encrypt(h2FullPassword) + ")";
 
-        // Update values in memory
-        this.currentPassword = password;
+        updateProperties(encryptedPassword, encryptedRecoveryKey, encryptedDbPassword, "true");
+
+        // 3. Update the values in memory
+        this.currentPassword    = password;
         this.currentRecoveryKey = recoveryKey;
-        this.configured = "true";
+        this.configured         = "true";
+
+        // 4. Create the configuration marker
+        Files.createDirectories(Paths.get("data"));
+        Files.writeString(Paths.get("data/.configured"), "true");
 
         return recoveryKey;
+    }
+
+    private void changeH2Password(String newDbPassword) throws Exception {
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement()) {
+            stmt.execute("ALTER USER SA SET PASSWORD '" + newDbPassword + "'");
+        }
     }
 
     // ── Reset password ───────────────────────────────────────────────────
@@ -79,7 +104,14 @@ public class SecuritySetupService {
         String encryptedPassword = "ENC(" + encryptor.encrypt(newPassword) + ")";
         String encryptedRecoveryKey = "ENC(" + encryptor.encrypt(newRecoveryKey) + ")";
 
-        updateProperties(encryptedPassword, encryptedRecoveryKey, "true");
+        Properties current = new Properties();
+        try (FileInputStream fis = new FileInputStream(propertiesFilePath)) {
+            current.load(fis);
+        }
+
+        String existingDbPassword = current.getProperty("spring.datasource.password", "");
+
+        updateProperties(encryptedPassword, encryptedRecoveryKey, existingDbPassword, "true");
 
         this.currentPassword = newPassword;
         this.currentRecoveryKey = newRecoveryKey;
@@ -96,7 +128,7 @@ public class SecuritySetupService {
     }
 
     private void updateProperties(String encPassword, String encRecoveryKey,
-                                  String configuredValue) throws IOException {
+                                  String encDbPassword, String configuredValue) throws IOException {
         Properties props = new Properties();
 
         // Read the existing file
@@ -108,6 +140,7 @@ public class SecuritySetupService {
         props.setProperty("piki.security.password", encPassword);
         props.setProperty("piki.security.recovery-key", encRecoveryKey);
         props.setProperty("piki.security.configured", configuredValue);
+        props.setProperty("spring.datasource.password", encDbPassword);
 
         // Write
         try (FileOutputStream fos = new FileOutputStream(propertiesFilePath)) {

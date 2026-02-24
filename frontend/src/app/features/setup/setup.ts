@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { RecoveryKeyService } from '../../services/recovery-key.service';
 
 type SetupStep = 'form' | 'recovery-key';
 
@@ -25,7 +26,8 @@ export class SetupComponent {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private recoveryKeyService: RecoveryKeyService
   ) {}
 
   onSetup(): void {
@@ -42,13 +44,11 @@ export class SetupComponent {
     this.errorMsg = '';
 
     this.http.post<{ success: boolean; recoveryKey: string }>(
-      '/api/setup/configure', { password: this.password }
+      '/api/setup/configure', { password: this.password, dbPassword: this.password }
     ).subscribe({
       next: res => {
-        this.recoveryKey = res.recoveryKey;
-        this.step = 'recovery-key';
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.recoveryKeyService.set(res.recoveryKey);
+        this.router.navigate(['/recovery-key']);
       },
       error: err => {
         this.errorMsg = err.error?.error || 'Setup failed';
