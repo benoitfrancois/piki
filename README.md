@@ -122,4 +122,4 @@ Piki is free to use for personal use.
 
 ## 💬 Support & Donations
 
-If you enjoy using Piki, consider supporting the project at [getpiki.app](https://getpiki.app).
+If you enjoy using Piki, consider supporting the project at website coming soon.
