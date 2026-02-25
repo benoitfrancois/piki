@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -11,11 +11,19 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.html',
   styleUrls: ['./login.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit{
   password = '';
   errorMsg = '';
   isLoading = false;
   showPassword = false;
+
+  ngOnInit(): void {
+    this.auth.checkSetupStatus().subscribe(res => {
+      if (!res.configured) {
+        this.router.navigate(['/setup']);
+      }
+    });
+  }
 
   constructor(
     private auth: AuthService,
