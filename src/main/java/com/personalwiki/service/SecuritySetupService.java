@@ -24,13 +24,13 @@ public class SecuritySetupService {
 
     private final DataSource dataSource;
 
-    @Value("${piki.security.configured}")
+    @Value("${piki.security.configured:false}")
     private String configured;
 
-    @Value("${piki.security.password}")
+    @Value("${piki.security.password:CHANGE_ME}")
     private String currentPassword;
 
-    @Value("${piki.security.recovery-key}")
+    @Value("${piki.security.recovery-key:CHANGE_ME}")
     private String currentRecoveryKey;
 
     @Value("${piki.config.file:./application.properties}")
@@ -54,7 +54,7 @@ public class SecuritySetupService {
 
     /**
      * Configures the password and generates a backup key.
-     * Writes the encrypted values to application.properties.back.
+     * Writes the encrypted values to application.properties.
      * @return the backup key in plain text (to be displayed only once)
      */
     public String setup(String password, String dbPassword) throws Exception {
@@ -65,10 +65,7 @@ public class SecuritySetupService {
         String recoveryKey          = generateRecoveryKey();
         String encryptedPassword    = "ENC(" + encryptor.encrypt(password) + ")";
         String encryptedRecoveryKey = "ENC(" + encryptor.encrypt(recoveryKey) + ")";
-
-        // Format required by H2 CIPHER=AES: "filePassword userPassword"
-        String h2FullPassword      = dbPassword + " " + dbPassword;
-        String encryptedDbPassword = "ENC(" + encryptor.encrypt(h2FullPassword) + ")";
+        String encryptedDbPassword  = "ENC(" + encryptor.encrypt(dbPassword) + ")";
 
         updateProperties(encryptedPassword, encryptedRecoveryKey, encryptedDbPassword, "true");
 

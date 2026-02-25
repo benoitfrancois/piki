@@ -5,7 +5,7 @@ import { Observable, BehaviorSubject, tap } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private authenticated$ = new BehaviorSubject<boolean>(false);
-  private configured$ = new BehaviorSubject<boolean>(true);
+  private configured$ = new BehaviorSubject<boolean>(false);
 
   constructor(private http: HttpClient) {}
 
