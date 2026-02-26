@@ -141,7 +141,7 @@ public class SecuritySetupService {
 
         // Write
         try (FileOutputStream fos = new FileOutputStream(propertiesFilePath)) {
-            props.store(fos, "Piki Security Configuration — do not edit manually");
+            props.store(fos, "Piki Security Configuration, do not edit password manually");
         }
     }
 }
