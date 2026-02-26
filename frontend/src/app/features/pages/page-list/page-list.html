@@ -57,18 +57,53 @@
 
       <!-- Tag Filters -->
       <div *ngIf="allTags.length > 0" class="mt-6">
-        <label class="block text-sm font-medium text-gray-700 mb-3">Filter by Tags</label>
-        <div class="flex flex-wrap gap-2">
-          <button
-            *ngFor="let tag of allTags"
-            (click)="toggleTag(tag.name)"
-            [class]="isTagSelected(tag.name)
-              ? 'bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium transition hover:bg-blue-700'
-              : 'bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium transition hover:bg-gray-200'"
-          >
-            #{{ tag.name }}
-          </button>
+        <div class="flex items-center justify-between mb-3">
+          <label class="block text-sm font-medium text-gray-700">
+            Filter by Tags
+            <!-- Badge indicating how many tags are active -->
+            <span *ngIf="selectedTags.length > 0"
+                  class="ml-2 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
+        {{ selectedTags.length }} active
+      </span>
+          </label>
+          <!-- Small field for filtering the tags themselves -->
+          <input
+            type="text"
+            [(ngModel)]="tagFilter"
+            placeholder="Filter tags..."
+            class="text-sm px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none w-44"
+          />
         </div>
+
+        <!-- Selected tags first, then the others -->
+        <div class="flex flex-wrap gap-2">
+          <!-- Active tags (always visible at the top) -->
+          <button
+            *ngFor="let tag of selectedTags"
+            (click)="toggleTag(tag)"
+            class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium transition hover:bg-blue-700 flex items-center gap-1"
+          >
+            #{{ tag }}
+            <span class="text-blue-200 text-xs">✕</span>
+          </button>
+
+          <!-- Tags not selected, filtered by tagFilter -->
+          <ng-container *ngFor="let tag of visibleTags">
+            <button
+              *ngIf="!isTagSelected(tag.name)"
+              (click)="toggleTag(tag.name)"
+              class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium transition hover:bg-gray-200"
+            >
+              #{{ tag.name }}
+            </button>
+          </ng-container>
+        </div>
+
+        <!-- Message if the tag filter finds nothing -->
+        <p *ngIf="visibleTags.length === 0 && tagFilter.trim()"
+           class="text-sm text-gray-400 mt-2">
+          No tags match "{{ tagFilter }}"
+        </p>
       </div>
     </div>
 
