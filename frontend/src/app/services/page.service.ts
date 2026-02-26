@@ -59,4 +59,8 @@ export class PageService {
   deleteType(id: number): Observable<void> {
     return this.http.delete<void>(`${this.typeUrl}/${id}`);
   }
+
+  getTypePageCount(id: number): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.typeUrl}/${id}/page-count`);
+  }
 }

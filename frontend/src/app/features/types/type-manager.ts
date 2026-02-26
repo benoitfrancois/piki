@@ -126,15 +126,33 @@ export class TypeManagerComponent implements OnInit {
   }
 
   delete(t: Type): void {
-    if (!confirm(`Delete type "${t.name}" ? Associated pages will have no type.`)) return;
-    this.pageService.deleteType(t.id).subscribe({
-      next: () => {
-        this.types = this.types.filter(x => x.id !== t.id);
-        this.applyFilter();
-        this.cdr.detectChanges();
-        },
-      error: err => {
-        alert(err.error?.error || 'Delete error');
+    this.pageService.getTypePageCount(t.id).subscribe({
+      next: ({ count }) => {
+        const message = count > 0
+          ? `⚠️ The type "${t.name}" is used by ${count} page(s).\n\nThese pages will be set to "No Type".\n\nConfirm deletion?`
+          : `Delete type "${t.name}"?`;
+
+        if (!confirm(message)) return;
+
+        this.pageService.deleteType(t.id).subscribe({
+          next: () => {
+            this.types = this.types.filter(x => x.id !== t.id);
+            this.applyFilter();
+            this.cdr.detectChanges();
+          },
+          error: err => { alert(err.error?.error || 'Delete error'); }
+        });
+      },
+      error: () => {
+        if (!confirm(`Delete type "${t.name}"?`)) return;
+        this.pageService.deleteType(t.id).subscribe({
+          next: () => {
+            this.types = this.types.filter(x => x.id !== t.id);
+            this.applyFilter();
+            this.cdr.detectChanges();
+          },
+          error: err => { alert(err.error?.error || 'Delete error'); }
+        });
       }
     });
   }

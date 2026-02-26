@@ -3,6 +3,7 @@ package com.personalwiki.repository;
 import com.personalwiki.model.Page;
 import com.personalwiki.model.Type;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -29,4 +30,10 @@ public interface PageRepository extends JpaRepository<Page, Long> {
 
     // Search in the content
     List<Page> findByContentContainingIgnoreCase(String content);
+
+    @Modifying
+    @Query("UPDATE Page p SET p.type = null WHERE p.type.id = :typeId")
+    void clearTypeFromPages(@Param("typeId") Long typeId);
+
+    long countByTypeId(Long typeId);
 }

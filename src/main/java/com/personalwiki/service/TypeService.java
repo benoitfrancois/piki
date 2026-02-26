@@ -1,6 +1,7 @@
 package com.personalwiki.service;
 
 import com.personalwiki.model.Type;
+import com.personalwiki.repository.PageRepository;
 import com.personalwiki.repository.TypeRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
@@ -15,6 +16,9 @@ public class TypeService {
 
     @Autowired
     private TypeRepository typeRepository;
+
+    @Autowired
+    private PageRepository pageRepository;
 
     /**
      * Populate the database with the 5 default types if it is empty.
@@ -66,9 +70,14 @@ public class TypeService {
 
     @Transactional
     public void deleteType(Long id) {
-        Type type = typeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Type not found : " + id));
-        // Associated pages will have their type set to null (nullable = true in Page)
-        typeRepository.delete(type);
+        if (!typeRepository.existsById(id)) {
+            throw new RuntimeException("Type not found : " + id);
+        }
+        pageRepository.clearTypeFromPages(id);
+        typeRepository.deleteById(id);
+    }
+
+    public long countPagesByType(Long typeId) {
+        return pageRepository.countByTypeId(typeId);
     }
 }

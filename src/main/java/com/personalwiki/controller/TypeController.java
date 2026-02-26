@@ -61,6 +61,12 @@ public class TypeController {
         }
     }
 
+    @GetMapping("/{id}/page-count")
+    public ResponseEntity<Map<String, Long>> getPageCount(@PathVariable Long id) {
+        long count = typeService.countPagesByType(id);
+        return ResponseEntity.ok(Map.of("count", count));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteType(@PathVariable Long id) {
         try {
