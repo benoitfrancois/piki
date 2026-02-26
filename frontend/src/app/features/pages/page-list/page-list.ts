@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MarkdownModule } from 'ngx-markdown';
+import Fuse from 'fuse.js';
 import { PageService } from '../../../services/page.service';
 import { Page, Type, Tag } from '../../../models/page.model';
 
@@ -23,7 +24,11 @@ export class PageListComponent implements OnInit {
   selectedType: Type | null = null;
   selectedTags: string[] = [];
 
+  tagFilter: string = '';
+
   isLoading = true;
+
+  private fuse!: Fuse<Page>;
 
   constructor(
     private pageService: PageService,
@@ -56,6 +61,19 @@ export class PageListComponent implements OnInit {
     this.pageService.getAllPages().subscribe({
       next: (pages) => {
         this.allPages = pages;
+
+        this.fuse = new Fuse(pages, {
+          keys: [
+            { name: 'title',   weight: 3 },   // title counts 3x more
+            { name: 'tags.name', weight: 2 }, // tags count 2x
+            { name: 'content', weight: 1 }    // content counts 1x
+          ],
+          threshold: 0.25,       // 0 = exact, 1 = all accepted. 0.25 = reasonable tolerance
+          includeScore: true,    // we want the score to sort
+          ignoreLocation: true,  // search throughout the text, not just at the beginning
+          useExtendedSearch: false
+        });
+
         this.applyFilters();
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -83,14 +101,35 @@ export class PageListComponent implements OnInit {
   applyFilters(): void {
     let filtered = [...this.allPages];
 
-    // Filter by search query
+    // multi-word search with Fuse.js
     if (this.searchQuery.trim()) {
-      const query = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(page =>
-        page.title.toLowerCase().includes(query) ||
-        page.content?.toLowerCase().includes(query) ||
-        page.tags.some(tag => tag.name.toLowerCase().includes(query))
-      );
+      const words = this.searchQuery.trim().toLowerCase().split(/\s+/);
+
+      if (words.length === 1) {
+        // One word: let Fuse handle it (fuzzy + scoring)
+        const results = this.fuse.search(words[0]);
+        filtered = results.map(r => r.item);
+      } else {
+        // Multiple words: AND logic — each word must match
+        // We filter pages that contain ALL words
+        const matchingSets = words.map(word => {
+          const results = this.fuse.search(word);
+          return new Set(results.map(r => r.item.id));
+        });
+
+        // Intersection of sets (logical AND)
+        const intersection = matchingSets.reduce((a, b) =>
+          new Set([...a].filter(id => b.has(id)))
+        );
+
+        // We keep the pages that are in the intersection, in the order of the first word.
+        const firstWordResults = this.fuse.search(words[0]);
+        filtered = firstWordResults
+          .filter(r => intersection.has(r.item.id))
+          .map(r => r.item);
+      }
+    } else {
+      filtered = [...this.allPages];
     }
 
     // Filter by type
@@ -101,13 +140,19 @@ export class PageListComponent implements OnInit {
     // Filter by tags
     if (this.selectedTags.length > 0) {
       filtered = filtered.filter(page =>
-        this.selectedTags.some(selectedTag =>
+        this.selectedTags.every(selectedTag =>       // every = logic AND
           page.tags.some(tag => tag.name === selectedTag)
         )
       );
     }
 
     this.filteredPages = filtered;
+  }
+
+  get visibleTags(): Tag[] {
+    if (!this.tagFilter.trim()) return this.allTags;
+    const q = this.tagFilter.toLowerCase();
+    return this.allTags.filter(tag => tag.name.toLowerCase().includes(q));
   }
 
   onSearchChange(): void {
@@ -136,6 +181,7 @@ export class PageListComponent implements OnInit {
     this.searchQuery = '';
     this.selectedType = null;
     this.selectedTags = [];
+    this.tagFilter = '';
     this.applyFilters();
   }
 
